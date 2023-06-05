@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Welcome, {{ username }}!</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/welcome.css') }}">
+    <style>
+        .dragover {
+            border: 2px dashed #000;
+        }
+    </style>
+
+</head>
+
+<body>
+    <h2>Uploaded Files</h2>
+    {% if files %}
+        <ul>
+            {% for file in files %}
+            {% if file != '.' and file != '..' and file != '.DS_Store' %}
+            {% if file.startswith(username) %}
+                <li>{{ file }}</li>
+                {% endif %}
+                {% endif %}
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No files uploaded.</p>
+    {% endif %}
+    <div id="dropArea">
+        <p>Drag and drop a file here or</p>
+        <input type="file" id="fileInput" style="display: none">
+        <label for="fileInput" id="fileLabel">Select a file</label>
+    </div>
+
+
+    <form id="uploadForm" method="POST" action="/upload" enctype="multipart/form-data">
+        <input type="file" name="file" id="uploadInput" style="display: none">
+        <input type="button" value="Upload" onclick="uploadFile()">
+        <input type="submit" value="Submit" style="display: none">
+    </form>
+
+    <form method="POST" action="/logout">
+        <input type="submit" value="Logout">
+    </form>
+
+
+    <script>
+        // Function to handle the file drop event
+        function handleFileDrop(event) {
+            event.preventDefault();
+            var files = event.dataTransfer.files;
+            handleFiles(files);
+        }
+
+        // Function to handle the file selection event
+        function handleFileSelect(event) {
+            var files = event.target.files;
+            handleFiles(files);
+        }
+
+        // Function to handle the uploaded files
+        function handleFiles(files) {
+            var fileInput = document.getElementById('fileInput');
+            fileInput.files = files;
+            document.getElementById('fileLabel').textContent = fileInput.files[0].name;
+        }
+        function uploadFile() {
+           var fileInput = document.getElementById('fileInput');
+           var uploadInput = document.getElementById('uploadInput');
+           uploadInput.files = fileInput.files;
+           document.getElementById('uploadForm').submit();
+       }
+
+
+        // Register drag and drop events
+        var dropArea = document.getElementById('dropArea');
+        dropArea.addEventListener('dragover', function(event) {
+            event.preventDefault();
+            dropArea.classList.add('dragover');
+        });
+
+        dropArea.addEventListener('dragleave', function(event) {
+            event.preventDefault();
+            dropArea.classList.remove('dragover');
+        });
+
+        dropArea.addEventListener('drop', function(event) {
+            event.preventDefault();
+            dropArea.classList.remove('dragover');
+            var files = event.dataTransfer.files;
+            handleFiles(files);
+        });
+
+        // Register file input change event
+        var fileInput = document.getElementById('fileInput');
+        fileInput.addEventListener('change', function(event) {
+            handleFileSelect(event);
+        });
+    </script>
+
+
+</body>
+
+</html>
